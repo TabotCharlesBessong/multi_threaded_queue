@@ -48,6 +48,7 @@
 .tmp_versions/
 modules.order
 Module.symvers
+steps
 Mkfile.old
 dkms.conf
 
