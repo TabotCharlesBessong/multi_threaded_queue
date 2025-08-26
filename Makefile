@@ -2,7 +2,8 @@ CC = gcc
 # CFLAGS for C11 standard, all warnings, pedantic checks, and debug symbols
 CFLAGS = -std=c11 -Wall -pedantic -g
 # Libraries needed for POSIX threads and real-time extensions (for message queues)
-LIBS = -lpthread -lrt
+# Note: -lrt is not available on Windows, so we'll handle this conditionally
+LIBS = -lpthread
 
 # Executable names
 SERVER_NAME = server
@@ -12,7 +13,7 @@ CLIENT_NAME = client
 # Common source files used by both server and client
 COMMON_SRCS = parsers.c
 # Server-specific source files
-SERVER_SRCS = server.c $(COMMON_SRCS)
+SERVER_SRCS = server.c server_impl.c $(COMMON_SRCS)
 # Client-specific source files
 CLIENT_SRCS = client.c
 

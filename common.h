@@ -3,6 +3,7 @@
 
 #include <time.h>    // For time_t
 #include <pthread.h> // For threading primitives
+#include <signal.h>  // For signal handling
 
 // =============================================================================
 // CONSTANTS
@@ -102,5 +103,84 @@ typedef struct
 // FUNCTION PROTOTYPES (for parsers)
 // =============================================================================
 
-// We will add function prototypes here in the next step
-// e.g., void parse_rescuers(const char* filename);
+// Parser function prototypes
+int parse_rescuers(const char* filename, rescuer_type_t** rescuers, int* rescuer_count);
+int parse_emergency_types(const char* filename, emergency_type_t** emergency_types, int* emergency_type_count, rescuer_type_t* rescuers, int rescuer_count);
+int parse_env(const char* filename, char* queue_name, int* max_emergencies, char* log_level, int* base_timeout);
+
+// Utility functions
+rescuer_type_t* find_rescuer_type(const char* name, rescuer_type_t* rescuers, int rescuer_count);
+void free_rescuer_types(rescuer_type_t* rescuers, int count);
+void free_emergency_types(emergency_type_t* emergency_types, int count);
+
+// =============================================================================
+// THREAD-SAFE QUEUE STRUCTURES
+// =============================================================================
+
+// Node for the priority queue
+typedef struct queue_node {
+    emergency_t* emergency;
+    struct queue_node* next;
+} queue_node_t;
+
+// Thread-safe priority queue
+typedef struct {
+    queue_node_t* head;
+    pthread_mutex_t mutex;
+    int count;
+} priority_queue_t;
+
+// =============================================================================
+// GLOBAL STATE STRUCTURE
+// =============================================================================
+
+typedef struct {
+    rescuer_type_t* rescuers;
+    int rescuer_count;
+    emergency_type_t* emergency_types;
+    int emergency_type_count;
+    char queue_name[64];
+    int max_emergencies;
+    char log_level[16];
+    int base_timeout;
+    
+    // Priority queues
+    priority_queue_t high_priority_q;
+    priority_queue_t medium_priority_q;
+    priority_queue_t low_priority_q;
+    
+    // Global rescuer pool
+    rescuer_digital_twin_t* rescuer_pool;
+    int rescuer_pool_size;
+    pthread_mutex_t rescuer_pool_mutex;
+    
+    // Shutdown flag
+    volatile sig_atomic_t shutdown_requested;
+} server_state_t;
+
+// =============================================================================
+// THREAD FUNCTION PROTOTYPES
+// =============================================================================
+
+void* listener_thread(void* arg);
+void* dispatcher_thread(void* arg);
+void* worker_thread(void* arg);
+
+// =============================================================================
+// QUEUE OPERATIONS
+// =============================================================================
+
+void init_priority_queue(priority_queue_t* queue);
+void enqueue_emergency(priority_queue_t* queue, emergency_t* emergency);
+emergency_t* dequeue_emergency(priority_queue_t* queue);
+void cleanup_priority_queue(priority_queue_t* queue);
+
+// =============================================================================
+// SERVER OPERATIONS
+// =============================================================================
+
+int initialize_server(server_state_t* state);
+void cleanup_server(server_state_t* state);
+int create_rescuer_pool(server_state_t* state);
+
+#endif // COMMON_H
