@@ -124,7 +124,37 @@ void enqueue_emergency(emergency_queue_t *queue, emergency_t *emergency) {
     mtx_unlock(&queue->mutex);
 }
 
+// Fixed dequeue function in utils.c - don't lock in dispatcher since we already lock there
+
 emergency_t* dequeue_emergency(emergency_queue_t *queue) {
+    // Note: This function expects the mutex to already be locked by the caller
+    
+    if (queue->head == NULL) {
+        return NULL;
+    }
+    
+    emergency_queue_node_t *node = queue->head;
+    emergency_t *emergency = node->emergency;
+    
+    queue->head = node->next;
+    if (queue->head == NULL) {
+        queue->tail = NULL;
+    }
+    
+    queue->count--;
+    
+    char log_msg[256];
+    snprintf(log_msg, sizeof(log_msg), "Emergency %d dequeued, queue size: %d", 
+             emergency->id, queue->count);
+    write_log("QUEUE", "EMERGENCY_DEQUEUE", log_msg);
+    
+    free(node);
+    
+    return emergency;
+}
+
+// Alternative: Create a safer version that handles its own locking
+emergency_t* dequeue_emergency_safe(emergency_queue_t *queue) {
     mtx_lock(&queue->mutex);
     
     if (queue->head == NULL) {

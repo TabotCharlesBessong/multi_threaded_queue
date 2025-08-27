@@ -30,12 +30,16 @@ void parse_rescuers(const char *filename) {
         
         // Parse line: [Name][Num][Speed][X;Y]
         if (sscanf(line, "[%63[^]]][%d][%d][%d;%d]", name, &num, &speed, &x, &y) != 5) {
-            char log_msg[256];
-            snprintf(log_msg, sizeof(log_msg), "Invalid format in line: %s", line);
+            char log_msg[512]; // Increased buffer size
+            // Truncate line for logging if too long
+            char truncated_line[100];
+            strncpy(truncated_line, line, sizeof(truncated_line) - 1);
+            truncated_line[sizeof(truncated_line) - 1] = '\0';
+            
+            snprintf(log_msg, sizeof(log_msg), "Invalid format in line: %.90s", truncated_line);
             write_log("PARSER", "FILE_PARSING", log_msg);
             continue;
         }
-        
         // Validate parsed data
         if (num <= 0 || speed <= 0) {
             char log_msg[256];

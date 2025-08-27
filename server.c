@@ -1,4 +1,5 @@
 #include "common.h"
+#include <sys/select.h>
 
 static mqd_t message_queue = -1;
 static volatile sig_atomic_t terminate_flag = 0;
@@ -383,10 +384,18 @@ int dispatcher_thread_func(void *arg) {
     
     while (!terminate_flag) {
         emergency_t *emergency = NULL;
+        int found = 0;
         
         // Check high priority first, then medium, then low
-        for (int priority = 2; priority >= 0 && emergency == NULL; priority--) {
-            emergency = dequeue_emergency(&priority_queues[priority]);
+        for (int priority = 2; priority >= 0 && !found; priority--) {
+            mtx_lock(&priority_queues[priority].mutex);
+            
+            if (priority_queues[priority].head != NULL) {
+                emergency = dequeue_emergency(&priority_queues[priority]);
+                found = 1;
+            }
+            
+            mtx_unlock(&priority_queues[priority].mutex);
         }
         
         if (emergency != NULL) {
@@ -413,8 +422,8 @@ int dispatcher_thread_func(void *arg) {
                 write_log("SERVER", "DISPATCHER", log_msg);
             }
         } else {
-            // No emergencies available, sleep briefly
-            struct timespec sleep_time = {0, 100000000}; // 100ms
+            // No emergencies available, wait with timeout
+            struct timespec sleep_time = {0, 500000000}; // 500ms
             thrd_sleep(&sleep_time, NULL);
         }
     }
@@ -471,12 +480,25 @@ int main(int argc, char *argv[]) {
     // Remove existing queue if any
     mq_unlink(env_config.queue_name);
     
-    message_queue = mq_open(env_config.queue_name, O_CREAT | O_RDONLY, 0666, &queue_attr);
+    // FIXED: Create with both read and write permissions initially
+    message_queue = mq_open(env_config.queue_name, O_CREAT | O_RDWR, 0666, &queue_attr);
     if (message_queue == -1) {
         char log_msg[256];
         snprintf(log_msg, sizeof(log_msg), "Failed to create message queue: %s", env_config.queue_name);
         write_log("SERVER", "MESSAGE_QUEUE", log_msg);
         perror("Failed to create message queue");
+        cleanup_server();
+        exit(EXIT_FAILURE);
+    }
+    
+    // Close and reopen as read-only for receiving
+    mq_close(message_queue);
+    message_queue = mq_open(env_config.queue_name, O_RDONLY | O_NONBLOCK);
+    if (message_queue == -1) {
+        char log_msg[256];
+        snprintf(log_msg, sizeof(log_msg), "Failed to reopen message queue for reading: %s", env_config.queue_name);
+        write_log("SERVER", "MESSAGE_QUEUE", log_msg);
+        perror("Failed to reopen message queue");
         cleanup_server();
         exit(EXIT_FAILURE);
     }
@@ -496,20 +518,33 @@ int main(int argc, char *argv[]) {
     printf("Server ready. Listening for emergency requests...\n");
     printf("Press Ctrl+C to shutdown.\n");
     
-    // Main message receiving loop
+    // FIXED: Main message receiving loop with timeout
     while (!terminate_flag) {
         emergency_request_t request;
+        struct timespec timeout;
         
-        // Receive message from queue (blocking)
-        ssize_t msg_size = mq_receive(message_queue, (char*)&request, sizeof(request), NULL);
+        // Set timeout to 1 second
+        clock_gettime(CLOCK_REALTIME, &timeout);
+        timeout.tv_sec += 1;
+        
+        // Receive message from queue with timeout
+        ssize_t msg_size = mq_timedreceive(message_queue, (char*)&request, sizeof(request), NULL, &timeout);
         
         if (msg_size == -1) {
-            if (errno == EINTR && terminate_flag) {
+            if (errno == ETIMEDOUT) {
+                // Timeout occurred, check terminate_flag and continue
+                continue;
+            } else if (errno == EAGAIN || errno == EWOULDBLOCK) {
+                // No messages available, sleep briefly and continue
+                usleep(100000); // 100ms
+                continue;
+            } else if (errno == EINTR && terminate_flag) {
                 break; // Interrupted by signal
+            } else {
+                write_log("SERVER", "MESSAGE_QUEUE", "Error receiving message");
+                perror("mq_timedreceive");
+                continue;
             }
-            write_log("SERVER", "MESSAGE_QUEUE", "Error receiving message");
-            perror("mq_receive");
-            continue;
         }
         
         if (msg_size != sizeof(request)) {
