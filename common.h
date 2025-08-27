@@ -1,186 +1,186 @@
 #ifndef COMMON_H
 #define COMMON_H
 
-#include <time.h>    // For time_t
-#include <pthread.h> // For threading primitives
-#include <signal.h>  // For signal handling
+#define _POSIX_C_SOURCE 200809L
 
-// =============================================================================
-// CONSTANTS
-// =============================================================================
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <time.h>
+#include <errno.h>
+#include <mqueue.h>
+#include <fcntl.h>
+#include <signal.h>
+#include <sys/stat.h>
+#include <threads.h>
+#include <stdatomic.h>
 
+// Constants
 #define EMERGENCY_NAME_LENGTH 64
+#define MAX_MSG_SIZE 512
+#define MAX_RESCUERS 100
+#define MAX_EMERGENCY_TYPES 50
+#define MAX_RESCUER_TYPES 20
+#define LOG_FILENAME "emergency_system.log"
 
-// =============================================================================
-// ENUMS
-// =============================================================================
+// Error handling macros
+#define SCALL_ERROR -1
+#define SCALL(r, c, e) do { \
+    if((r = c) == SCALL_ERROR) { \
+        perror(e); \
+        exit(EXIT_FAILURE); \
+    } \
+} while(0)
 
-// Status for a rescuer unit (digital twin)
-typedef enum
-{
-  IDLE,
-  EN_ROUTE_TO_SCENE,
-  ON_SCENE,
-  RETURNING_TO_BASE
+#define SNCALL(r, c, e) do { \
+    if((r = c) == NULL) { \
+        perror(e); \
+        exit(EXIT_FAILURE); \
+    } \
+} while(0)
+
+#define ERR_OPEN(file, mode) do { \
+    if((file = fopen(#file, mode)) == NULL) { \
+        perror("Error opening " #file); \
+        exit(EXIT_FAILURE); \
+    } \
+} while(0)
+
+#define ERR_MALLOC(ptr, size) do { \
+    if((ptr = malloc(size)) == NULL) { \
+        perror("Error allocating memory"); \
+        exit(EXIT_FAILURE); \
+    } \
+} while(0)
+
+// Rescuer status enumeration
+typedef enum {
+    IDLE,
+    EN_ROUTE_TO_SCENE,
+    ON_SCENE,
+    RETURNING_TO_BASE
 } rescuer_status_t;
 
-// Status for an emergency instance
-typedef enum
-{
-  WAITING,
-  ASSIGNED,
-  IN_PROGRESS,
-  PAUSED, // For advanced preemption feature
-  COMPLETED,
-  CANCELED,
-  TIMEOUT
+// Emergency status enumeration
+typedef enum {
+    WAITING,
+    ASSIGNED,
+    IN_PROGRESS,
+    PAUSED,
+    COMPLETED,
+    CANCELED,
+    TIMEOUT
 } emergency_status_t;
 
-// =============================================================================
-// DATA STRUCTURES
-// =============================================================================
-
-// Represents a type of rescuer (e.g., "Pompieri")
-typedef struct
-{
-  char *rescuer_type_name;
-  int speed;
-  int base_x; // Base X coordinate
-  int base_y; // Base Y coordinate
+// Rescuer type structure
+typedef struct {
+    char *rescuer_type_name;
+    int speed;
+    int x;
+    int y;
 } rescuer_type_t;
 
-// Represents an individual rescuer unit (a "digital twin")
-typedef struct
-{
-  int id;
-  int current_x;
-  int current_y;
-  rescuer_type_t *rescuer_type; // Pointer to the type of this rescuer
-  rescuer_status_t status;
+// Digital twin structure for rescuers
+typedef struct {
+    int id;
+    int x;
+    int y;
+    rescuer_type_t *rescuer;
+    rescuer_status_t status;
+    mtx_t mutex;
 } rescuer_digital_twin_t;
 
-// Represents a request for a certain number of a specific rescuer type
-// for a given emergency type
-typedef struct
-{
-  rescuer_type_t *type;
-  int required_count;
-  int time_to_manage; // Time in seconds the unit will be busy on scene
+// Rescuer request structure
+typedef struct {
+    rescuer_type_t *type;
+    int required_count;
+    int time_to_manage;
 } rescuer_request_t;
 
-// Represents a type of emergency (e.g., "Incendio")
-typedef struct
-{
-  char *emergency_desc;
-  short priority;
-  rescuer_request_t *rescuers; // Dynamically allocated array of rescuer requests
-  int rescuers_req_number;     // Number of elements in the 'rescuers' array
+// Emergency type structure
+typedef struct {
+    short priority;
+    char *emergency_desc;
+    rescuer_request_t *rescuers;
+    int rescuers_req_number;
 } emergency_type_t;
 
-// Represents a raw emergency request received from the message queue
-typedef struct
-{
-  char emergency_name[EMERGENCY_NAME_LENGTH];
-  int x;
-  int y;
-  time_t timestamp;
+// Emergency request structure (for message queue)
+typedef struct {
+    char emergency_name[EMERGENCY_NAME_LENGTH];
+    int x;
+    int y;
+    time_t timestamp;
 } emergency_request_t;
 
-// Represents an active, tracked instance of an emergency
-typedef struct
-{
-  long id; // Unique ID for this emergency instance
-  emergency_type_t *type;
-  emergency_status_t status;
-  int x;
-  int y;
-  time_t time;                          // Timestamp when the emergency was registered
-  int rescuer_count;                    // Total number of rescuers assigned
-  rescuer_digital_twin_t **rescuers_dt; // Array of pointers to assigned rescuers
+// Emergency structure
+typedef struct {
+    emergency_type_t type;
+    emergency_status_t status;
+    int x;
+    int y;
+    time_t time;
+    int rescuer_count;
+    rescuer_digital_twin_t **rescuers_dt;
+    mtx_t mutex;
+    int id;
 } emergency_t;
 
-// =============================================================================
-// FUNCTION PROTOTYPES (for parsers)
-// =============================================================================
+// Environment configuration
+typedef struct {
+    char queue_name[64];
+    int height;
+    int width;
+} environment_config_t;
 
-// Parser function prototypes
-int parse_rescuers(const char* filename, rescuer_type_t** rescuers, int* rescuer_count);
-int parse_emergency_types(const char* filename, emergency_type_t** emergency_types, int* emergency_type_count, rescuer_type_t* rescuers, int rescuer_count);
-int parse_env(const char* filename, char* queue_name, int* max_emergencies, char* log_level, int* base_timeout);
+// Global variables (declared as extern)
+extern rescuer_type_t rescuer_types[MAX_RESCUER_TYPES];
+extern int rescuer_types_count;
+extern rescuer_digital_twin_t rescuers[MAX_RESCUERS];
+extern int rescuers_count;
+extern emergency_type_t emergency_types[MAX_EMERGENCY_TYPES];
+extern int emergency_types_count;
+extern environment_config_t env_config;
+extern FILE *log_file;
+extern mtx_t log_mutex;
+
+// Function declarations
+void parse_rescuers(const char *filename);
+void parse_emergency_types(const char *filename);
+void parse_env(const char *filename);
+
+// Logging functions
+void write_log(const char *id, const char *event, const char *message);
+void init_logging(void);
+void cleanup_logging(void);
 
 // Utility functions
-rescuer_type_t* find_rescuer_type(const char* name, rescuer_type_t* rescuers, int rescuer_count);
-void free_rescuer_types(rescuer_type_t* rescuers, int count);
-void free_emergency_types(emergency_type_t* emergency_types, int count);
+int calculate_manhattan_distance(int x1, int y1, int x2, int y2);
+double calculate_travel_time(int distance, int speed);
+rescuer_type_t* find_rescuer_type(const char *name);
+emergency_type_t* find_emergency_type(const char *name);
 
-// =============================================================================
-// THREAD-SAFE QUEUE STRUCTURES
-// =============================================================================
+// Thread-safe queue for emergencies
+typedef struct emergency_queue_node {
+    emergency_t *emergency;
+    struct emergency_queue_node *next;
+} emergency_queue_node_t;
 
-// Node for the priority queue
-typedef struct queue_node {
-    emergency_t* emergency;
-    struct queue_node* next;
-} queue_node_t;
-
-// Thread-safe priority queue
 typedef struct {
-    queue_node_t* head;
-    pthread_mutex_t mutex;
+    emergency_queue_node_t *head;
+    emergency_queue_node_t *tail;
+    mtx_t mutex;
+    cnd_t condition;
     int count;
-} priority_queue_t;
+} emergency_queue_t;
 
-// =============================================================================
-// GLOBAL STATE STRUCTURE
-// =============================================================================
+extern emergency_queue_t priority_queues[3]; // 0=low, 1=medium, 2=high
 
-typedef struct {
-    rescuer_type_t* rescuers;
-    int rescuer_count;
-    emergency_type_t* emergency_types;
-    int emergency_type_count;
-    char queue_name[64];
-    int max_emergencies;
-    char log_level[16];
-    int base_timeout;
-    
-    // Priority queues
-    priority_queue_t high_priority_q;
-    priority_queue_t medium_priority_q;
-    priority_queue_t low_priority_q;
-    
-    // Global rescuer pool
-    rescuer_digital_twin_t* rescuer_pool;
-    int rescuer_pool_size;
-    pthread_mutex_t rescuer_pool_mutex;
-    
-    // Shutdown flag
-    volatile sig_atomic_t shutdown_requested;
-} server_state_t;
-
-// =============================================================================
-// THREAD FUNCTION PROTOTYPES
-// =============================================================================
-
-void* listener_thread(void* arg);
-void* dispatcher_thread(void* arg);
-void* worker_thread(void* arg);
-
-// =============================================================================
-// QUEUE OPERATIONS
-// =============================================================================
-
-void init_priority_queue(priority_queue_t* queue);
-void enqueue_emergency(priority_queue_t* queue, emergency_t* emergency);
-emergency_t* dequeue_emergency(priority_queue_t* queue);
-void cleanup_priority_queue(priority_queue_t* queue);
-
-// =============================================================================
-// SERVER OPERATIONS
-// =============================================================================
-
-int initialize_server(server_state_t* state);
-void cleanup_server(server_state_t* state);
-int create_rescuer_pool(server_state_t* state);
+// Queue operations
+void init_emergency_queue(emergency_queue_t *queue);
+void enqueue_emergency(emergency_queue_t *queue, emergency_t *emergency);
+emergency_t* dequeue_emergency(emergency_queue_t *queue);
+void cleanup_emergency_queue(emergency_queue_t *queue);
 
 #endif // COMMON_H
