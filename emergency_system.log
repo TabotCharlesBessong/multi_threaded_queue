@@ -1,0 +1,129 @@
+
+=== Emergency System Session Started [1756283227] ===
+[1756283227] [SERVER] [STARTUP] Emergency Management Server started
+[1756283227] [PARSER] [FILE_PARSING] Starting env.conf parsing
+[1756283227] [PARSER] [FILE_PARSING] Successfully opened env.conf
+[1756283227] [PARSER] [FILE_PARSING] Parsed: queue = emergenze
+[1756283227] [PARSER] [FILE_PARSING] Set queue name: /emergenze
+[1756283227] [PARSER] [FILE_PARSING] Parsed: height = 300
+[1756283227] [PARSER] [FILE_PARSING] Set height: 300
+[1756283227] [PARSER] [FILE_PARSING] Parsed: width = 400
+[1756283227] [PARSER] [FILE_PARSING] Set width: 400
+[1756283227] [PARSER] [FILE_PARSING] Environment parsing completed. Queue: /emergenze, Dimensions: 400x300
+[1756283227] [PARSER] [FILE_PARSING] Starting rescuers.conf parsing
+[1756283227] [PARSER] [FILE_PARSING] Successfully opened rescuers.conf
+[1756283227] [PARSER] [FILE_PARSING] Parsed rescuer type: Pompieri, count=5, speed=2, base=(100,200)
+[1756283227] [PARSER] [FILE_PARSING] Created digital twin 0 for Pompieri at (100,200)
+[1756283227] [PARSER] [FILE_PARSING] Created digital twin 1 for Pompieri at (100,200)
+[1756283227] [PARSER] [FILE_PARSING] Created digital twin 2 for Pompieri at (100,200)
+[1756283227] [PARSER] [FILE_PARSING] Created digital twin 3 for Pompieri at (100,200)
+[1756283227] [PARSER] [FILE_PARSING] Created digital twin 4 for Pompieri at (100,200)
+[1756283227] [PARSER] [FILE_PARSING] Parsed rescuer type: Ambulanza, count=3, speed=4, base=(150,250)
+[1756283227] [PARSER] [FILE_PARSING] Created digital twin 5 for Ambulanza at (150,250)
+[1756283227] [PARSER] [FILE_PARSING] Created digital twin 6 for Ambulanza at (150,250)
+[1756283227] [PARSER] [FILE_PARSING] Created digital twin 7 for Ambulanza at (150,250)
+[1756283227] [PARSER] [FILE_PARSING] Parsed rescuer type: Polizia, count=4, speed=3, base=(50,100)
+[1756283227] [PARSER] [FILE_PARSING] Created digital twin 8 for Polizia at (50,100)
+[1756283227] [PARSER] [FILE_PARSING] Created digital twin 9 for Polizia at (50,100)
+[1756283227] [PARSER] [FILE_PARSING] Created digital twin 10 for Polizia at (50,100)
+[1756283227] [PARSER] [FILE_PARSING] Created digital twin 11 for Polizia at (50,100)
+[1756283227] [PARSER] [FILE_PARSING] Parsing completed. Types: 3, Total rescuers: 12
+[1756283227] [PARSER] [FILE_PARSING] Starting emergency_types.conf parsing
+[1756283227] [PARSER] [FILE_PARSING] Successfully opened emergency_types.conf
+[1756283227] [PARSER] [FILE_PARSING] Added requirement: Pompieri x2 for 8s
+[1756283227] [PARSER] [FILE_PARSING] Added requirement: Ambulanza x1 for 2s
+[1756283227] [PARSER] [FILE_PARSING] Parsed emergency type: Incendio, priority=2, rescuer_reqs=2
+[1756283227] [PARSER] [FILE_PARSING] Added requirement: Pompieri x1 for 5s
+[1756283227] [PARSER] [FILE_PARSING] Added requirement: Ambulanza x1 for 3s
+[1756283227] [PARSER] [FILE_PARSING] Parsed emergency type: Allagamento, priority=1, rescuer_reqs=2
+[1756283227] [PARSER] [FILE_PARSING] Added requirement: Polizia x3 for 6s
+[1756283227] [PARSER] [FILE_PARSING] Added requirement: Ambulanza x2 for 4s
+[1756283227] [PARSER] [FILE_PARSING] Parsed emergency type: Sommossa, priority=2, rescuer_reqs=2
+[1756283227] [PARSER] [FILE_PARSING] Added requirement: Ambulanza x2 for 5s
+[1756283227] [PARSER] [FILE_PARSING] Added requirement: Polizia x1 for 3s
+[1756283227] [PARSER] [FILE_PARSING] Parsed emergency type: Incidente, priority=1, rescuer_reqs=2
+[1756283227] [PARSER] [FILE_PARSING] Emergency types parsing completed. Total types: 4
+[1756283227] [SERVER] [MESSAGE_QUEUE] Message queue created: /emergenze
+[1756283227] [SERVER] [STARTUP] Server initialization completed
+[1756283227] [SERVER] [DISPATCHER] Dispatcher thread started
+
+=== Emergency System Session Started [1756283272] ===
+[1756283272] [CLIENT] [STARTUP] Client application started
+[1756283272] [PARSER] [FILE_PARSING] Starting env.conf parsing
+[1756283272] [PARSER] [FILE_PARSING] Successfully opened env.conf
+[1756283272] [PARSER] [FILE_PARSING] Parsed: queue = emergenze
+[1756283272] [PARSER] [FILE_PARSING] Set queue name: /emergenze
+[1756283272] [PARSER] [FILE_PARSING] Parsed: height = 300
+[1756283272] [PARSER] [FILE_PARSING] Set height: 300
+[1756283272] [PARSER] [FILE_PARSING] Parsed: width = 400
+[1756283272] [PARSER] [FILE_PARSING] Set width: 400
+[1756283272] [PARSER] [FILE_PARSING] Environment parsing completed. Queue: /emergenze, Dimensions: 400x300
+[1756283272] [PARSER] [FILE_PARSING] Starting rescuers.conf parsing
+[1756283272] [PARSER] [FILE_PARSING] Successfully opened rescuers.conf
+[1756283272] [PARSER] [FILE_PARSING] Parsed rescuer type: Pompieri, count=5, speed=2, base=(100,200)
+[1756283272] [PARSER] [FILE_PARSING] Created digital twin 0 for Pompieri at (100,200)
+[1756283272] [PARSER] [FILE_PARSING] Created digital twin 1 for Pompieri at (100,200)
+[1756283272] [PARSER] [FILE_PARSING] Created digital twin 2 for Pompieri at (100,200)
+[1756283272] [PARSER] [FILE_PARSING] Created digital twin 3 for Pompieri at (100,200)
+[1756283272] [PARSER] [FILE_PARSING] Created digital twin 4 for Pompieri at (100,200)
+[1756283272] [PARSER] [FILE_PARSING] Parsed rescuer type: Ambulanza, count=3, speed=4, base=(150,250)
+[1756283272] [PARSER] [FILE_PARSING] Created digital twin 5 for Ambulanza at (150,250)
+[1756283272] [PARSER] [FILE_PARSING] Created digital twin 6 for Ambulanza at (150,250)
+[1756283272] [PARSER] [FILE_PARSING] Created digital twin 7 for Ambulanza at (150,250)
+[1756283272] [PARSER] [FILE_PARSING] Parsed rescuer type: Polizia, count=4, speed=3, base=(50,100)
+[1756283272] [PARSER] [FILE_PARSING] Created digital twin 8 for Polizia at (50,100)
+[1756283272] [PARSER] [FILE_PARSING] Created digital twin 9 for Polizia at (50,100)
+[1756283272] [PARSER] [FILE_PARSING] Created digital twin 10 for Polizia at (50,100)
+[1756283272] [PARSER] [FILE_PARSING] Created digital twin 11 for Polizia at (50,100)
+[1756283272] [PARSER] [FILE_PARSING] Parsing completed. Types: 3, Total rescuers: 12
+[1756283272] [PARSER] [FILE_PARSING] Starting emergency_types.conf parsing
+[1756283272] [PARSER] [FILE_PARSING] Successfully opened emergency_types.conf
+[1756283272] [PARSER] [FILE_PARSING] Added requirement: Pompieri x2 for 8s
+[1756283272] [PARSER] [FILE_PARSING] Added requirement: Ambulanza x1 for 2s
+[1756283272] [PARSER] [FILE_PARSING] Parsed emergency type: Incendio, priority=2, rescuer_reqs=2
+[1756283272] [PARSER] [FILE_PARSING] Added requirement: Pompieri x1 for 5s
+[1756283272] [PARSER] [FILE_PARSING] Added requirement: Ambulanza x1 for 3s
+[1756283272] [PARSER] [FILE_PARSING] Parsed emergency type: Allagamento, priority=1, rescuer_reqs=2
+[1756283272] [PARSER] [FILE_PARSING] Added requirement: Polizia x3 for 6s
+[1756283272] [PARSER] [FILE_PARSING] Added requirement: Ambulanza x2 for 4s
+[1756283272] [PARSER] [FILE_PARSING] Parsed emergency type: Sommossa, priority=2, rescuer_reqs=2
+[1756283272] [PARSER] [FILE_PARSING] Added requirement: Ambulanza x2 for 5s
+[1756283272] [PARSER] [FILE_PARSING] Added requirement: Polizia x1 for 3s
+[1756283272] [PARSER] [FILE_PARSING] Parsed emergency type: Incidente, priority=1, rescuer_reqs=2
+[1756283272] [PARSER] [FILE_PARSING] Emergency types parsing completed. Total types: 4
+[1756283272] [CLIENT] [MESSAGE_QUEUE] Connected to message queue: /emergenze
+[1756283272] [CLIENT] [MODE] Running in command line mode
+[1756283272] [CLIENT] [TIMING] Waiting 5 seconds before sending emergency
+[1756283277] [CLIENT] [MESSAGE_QUEUE] Sent emergency: Incendio at (100,150) timestamp=1756283277
+[1756283277] [CLIENT] [SHUTDOWN] Client application completed
+[1756283277] [CLIENT] [MESSAGE_QUEUE] Message queue closed
+=== Emergency System Session Ended [1756283277] ===
+
+[1756283277] [SERVER] [MESSAGE_QUEUE] Received emergency request: Incendio at (100,150) timestamp=1756283277
+[1756283277] [SERVER] [EMERGENCY_CREATION] Created emergency 1: Incendio at (100,150) priority=2
+[1756283277] [QUEUE] [EMERGENCY_ENQUEUE] Emergency 1 enqueued, queue size: 1
+[1756283277] [SERVER] [EMERGENCY_STATUS] Emergency 1 queued with priority 2
+[1756283277] [QUEUE] [EMERGENCY_DEQUEUE] Emergency 1 dequeued, queue size: 0
+[1756283277] [SERVER] [DISPATCHER] Created worker 1 for emergency 1
+[1756283277] [SERVER] [WORKER_THREAD] Worker 1 handling emergency 1
+[1756283277] [SERVER] [RESCUER_ASSIGNMENT] Attempting to assign rescuers to emergency 1
+[1756283277] [SERVER] [RESCUER_STATUS] Assigned rescuer 0 (Pompieri) to emergency 1
+[1756283277] [SERVER] [RESCUER_STATUS] Assigned rescuer 1 (Pompieri) to emergency 1
+[1756283277] [SERVER] [RESCUER_STATUS] Assigned rescuer 5 (Ambulanza) to emergency 1
+[1756283277] [SERVER] [RESCUER_ASSIGNMENT] Successfully assigned 3 rescuers to emergency 1
+[1756283277] [SERVER] [EMERGENCY_STATUS] Emergency 1 status: IN_PROGRESS
+[1756283277] [SERVER] [RESCUER_STATUS] Rescuer 0 en route to emergency 1, ETA: 25.00 seconds
+[1756283302] [SERVER] [RESCUER_STATUS] Rescuer 0 arrived at emergency 1 scene
+[1756283302] [SERVER] [RESCUER_STATUS] Rescuer 1 en route to emergency 1, ETA: 25.00 seconds
+[1756283327] [SERVER] [RESCUER_STATUS] Rescuer 1 arrived at emergency 1 scene
+[1756283327] [SERVER] [RESCUER_STATUS] Rescuer 5 en route to emergency 1, ETA: 37.50 seconds
+[1756283364] [SERVER] [RESCUER_STATUS] Rescuer 5 arrived at emergency 1 scene
+[1756283364] [SERVER] [EMERGENCY_STATUS] Emergency 1 intervention time: 8 seconds
+[1756283372] [SERVER] [EMERGENCY_STATUS] Emergency 1 status: COMPLETED
+[1756283372] [SERVER] [RESCUER_STATUS] Rescuer 0 returning to base, ETA: 25.00 seconds
+[1756283397] [SERVER] [RESCUER_STATUS] Rescuer 0 returned to base
+[1756283397] [SERVER] [RESCUER_STATUS] Rescuer 1 returning to base, ETA: 25.00 seconds
+[1756283422] [SERVER] [RESCUER_STATUS] Rescuer 1 returned to base
+[1756283422] [SERVER] [RESCUER_STATUS] Rescuer 5 returning to base, ETA: 37.50 seconds
+[1756283460] [SERVER] [RESCUER_STATUS] Rescuer 5 returned to base
+[1756283460] [SERVER] [WORKER_THREAD] Worker 1 completed emergency 1
